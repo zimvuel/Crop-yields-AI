@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gray-750: #2d3748; /* Custom intermediate shade if needed */
+}
+
+@layer base {
+  html, body {
+    @apply h-full w-full overflow-hidden bg-gray-950 text-gray-100 antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* Custom Scrollbar for Webkit */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-700/50 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-600;
+}

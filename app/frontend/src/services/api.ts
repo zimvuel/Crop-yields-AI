@@ -7,7 +7,8 @@ export const fetchCropPrediction = async (prompt: string): Promise<string> => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prompt }),
+      // FIX 1: Change 'prompt' to 'query' so Python can read it
+      body: JSON.stringify({ query: prompt }), 
     });
 
     if (!response.ok) {
@@ -15,7 +16,10 @@ export const fetchCropPrediction = async (prompt: string): Promise<string> => {
     }
 
     const data = await response.json();
-    return data.response;
+    
+    // FIX 2: Change 'response' to 'ai_message' (or 'result_text' if you prefer raw stats)
+    return data.ai_message; 
+    
   } catch (error) {
     console.error("Failed to fetch prediction:", error);
     throw error;

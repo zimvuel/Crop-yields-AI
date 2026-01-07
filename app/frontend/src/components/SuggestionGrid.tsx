@@ -15,7 +15,7 @@ export function SuggestionGrid({ onSelect }: SuggestionGridProps) {
     },
     {
       icon: <Calendar className="h-6 w-6 text-orange-400" />,
-      text: "Apakah cocok menanam cabai rawit di Jakarta bulan ini?",
+      text: "Apakah cocok menanam Lengkuas di Jakarta bulan ini?",
       label: "Kecocokan Lahan"
     },
     {

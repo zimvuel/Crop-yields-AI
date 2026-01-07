@@ -1,4 +1,6 @@
 import { Bot, User } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { cn } from '../utils/cn';
 import type { MessageBubbleProps } from '../types';
 
@@ -28,13 +30,19 @@ export function MessageBubble({ message, isUser, isLoading }: MessageBubbleProps
 
       <div
         className={cn(
-          "max-w-[80%] rounded-2xl px-5 py-3 text-sm leading-relaxed",
+          "max-w-[80%] rounded-2xl px-5 py-3 text-sm leading-relaxed prose prose-invert prose-p:my-1 prose-headings:mb-2 prose-ul:my-2 prose-li:my-0.5",
           isUser
             ? "bg-blue-600 text-white rounded-tr-sm"
             : "bg-gray-800/50 text-gray-100 rounded-tl-sm"
         )}
       >
-        {message}
+        {isUser ? (
+            message
+        ) : (
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {message || ''}
+            </ReactMarkdown>
+        )}
       </div>
 
        {isUser && (
@@ -45,3 +53,4 @@ export function MessageBubble({ message, isUser, isLoading }: MessageBubbleProps
     </div>
   );
 }
+

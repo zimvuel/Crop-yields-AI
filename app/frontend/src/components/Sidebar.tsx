@@ -1,17 +1,8 @@
-import { Plus, MessageSquare } from 'lucide-react';
+import { Plus, MessageSquare, Trash2 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import type { SidebarProps } from '../types';
 
-export function Sidebar({ isOpen, onClose, onNewChat }: SidebarProps) {
-  // history data example
-  const history = [
-    "Prediksi Panen Jagung",
-    "Penyakit Daun Padi",
-    "Jadwal Pupuk Kedelai",
-    "Analisa Tanah Lempung",
-    "Cuaca Minggu Ini"
-  ];
-
+export function Sidebar({ isOpen, onClose, onNewChat, sessions, onSelectSession, onDeleteSession }: SidebarProps & { onDeleteSession?: (id: string) => void }) {
   return (
     <>
       {/* Mobile Overlay */}
@@ -47,28 +38,27 @@ export function Sidebar({ isOpen, onClose, onNewChat }: SidebarProps) {
             Riwayat
           </div>
           <div className="space-y-1">
-            {history.map((item, index) => (
+            {sessions?.map((item) => (
               <button
-                key={index}
+                key={item.id}
+                onClick={() => onSelectSession?.(item.id)}
                 className="group flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-sm text-gray-300 hover:bg-gray-800/70 hover:text-white transition-colors text-left"
               >
                 <MessageSquare className="h-4 w-4 text-gray-500 group-hover:text-gray-300" />
-                <span className="truncate">{item}</span>
+                <span className="truncate flex-1">{item.title}</span>
+                {onDeleteSession && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteSession(item.id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded transition-all"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-gray-500 hover:text-red-500" />
+                  </button>
+                )}
               </button>
             ))}
-          </div>
-        </div>
-
-        {/* User */}
-        <div className="border-t border-gray-800 p-4">
-          <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-800/50 transition-colors cursor-pointer">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-              US
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-white">User</span>
-              <span className="text-xs text-gray-500">Free Plan</span>
-            </div>
           </div>
         </div>
       </aside>

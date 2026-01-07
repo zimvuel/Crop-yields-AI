@@ -4,11 +4,16 @@ import { ChatArea } from '../components/ChatArea';
 import { useChat } from '../hooks/useChat';
 
 export function ChatPage() {
+  const { messages, isLoading,    handleSendMessage, 
+    sessions, 
+    loadSession, 
+    startNewSession,
+    handleDeleteSession
+  } = useChat();
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const { messages, isLoading, handleSendMessage, clearMessages } = useChat();
 
   const handleNewChat = () => {
-    clearMessages();
+    startNewSession();
     setSidebarOpen(false);
   };
 
@@ -18,6 +23,12 @@ export function ChatPage() {
         isOpen={sidebarOpen} 
         onClose={() => setSidebarOpen(false)}
         onNewChat={handleNewChat}
+        sessions={sessions}
+        onSelectSession={(id) => {
+          loadSession(id);
+          setSidebarOpen(false);
+        }}
+        onDeleteSession={handleDeleteSession}
       />
       
       <div className="flex-1 flex flex-col h-full relative w-full">

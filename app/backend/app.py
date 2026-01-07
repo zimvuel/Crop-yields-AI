@@ -6,12 +6,16 @@ import datetime
 import difflib 
 import re
 from waitress import serve 
+import database as db
 
 app = Flask(__name__)
 CORS(app)
 
 print("Initializing AI Engine...")
 engine = CropPredictor()
+
+# --- DATABASE INIT ---
+db.init_db()
 
 # --- 1. GLOBAL MEMORY ---
 SESSION_MEMORY = {"crop": None, "province": None}
@@ -160,12 +164,15 @@ MODEL_NAME = "deepseek/deepseek-r1-0528:free"
 def get_deepseek_advice(user_query, context_text, missing_info=False):
     if not DEEPSEEK_API_KEY: return "AI Advice Unavailable."
     if missing_info:
-        prompt = f"""User: "{user_query}"\nSistem: "{context_text}"\nTugas: Minta user melengkapi data TANAMAN atau LOKASI."""
+        prompt = f"""User: "{user_query}"\nSistem: "{context_text}"\nTugas: Minta user melengkapi data TANAMAN atau LOKASI. Gunakan format Markdown (bold, list) agar mudah dibaca."""
     else:
         prompt = f"""
         Anda ahli pertanian. User bertanya: "{user_query}"
         Konteks: {context_text}
-        Jawab to the point. Gunakan poin (-). Sisipkan  jika relevan.
+        Jawab to the point. Gunakan format MARKDOWN yang rapi:
+        - Gunakan **Bold** untuk poin penting.
+        - Gunakan List (-) untuk langkah-langkah.
+        - Hindari teks blok panjang.
         """
     try:
         headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"}
@@ -255,15 +262,44 @@ def parse_date(query):
             
     return today.isoformat()
 
+# --- ROUTES ---
+
+@app.route('/sessions', methods=['GET'])
+def list_sessions():
+    return jsonify(db.get_sessions())
+
+@app.route('/sessions', methods=['POST'])
+def create_new_session():
+    data = request.json
+    title = data.get('title', 'New Chat')
+    session_id = db.create_session(title)
+    return jsonify({"id": session_id, "title": title})
+
+@app.route('/sessions/<session_id>/messages', methods=['GET'])
+def get_session_messages(session_id):
+    return jsonify(db.get_messages(session_id))
+
+@app.route('/sessions/<session_id>', methods=['DELETE'])
+def delete_session(session_id):
+    db.delete_session(session_id)
+    return jsonify({"status": "deleted", "id": session_id})
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
     query = data.get('query', '').lower()
+    session_id = data.get('session_id')
     
+    # Save User Message if session exists
+    if session_id:
+        db.add_message(session_id, "user", query)
+
     # Reset Memory
     if any(w in query for w in ['reset', 'ulang', 'hapus']):
         SESSION_MEMORY['crop'], SESSION_MEMORY['province'] = None, None
-        return jsonify({"result_text": "Reset", "ai_message": "Oke, memori direset."})
+        msg = "Oke, memori direset."
+        if session_id: db.add_message(session_id, "ai", msg)
+        return jsonify({"result_text": "Reset", "ai_message": msg})
 
     # Extract Entities
     new_crop, new_prov = extract_entities(query)
@@ -277,15 +313,24 @@ def predict():
 
     # General Knowledge Check
     if any(w in query for w in ['bagaimana', 'cara', 'tips']) and not final_prov:
-        if not final_crop: return jsonify({"result_text": "Butuh Info", "ai_message": get_deepseek_advice(query, "No Crop Detected", True)})
-        return jsonify({"result_text": "Info Umum", "ai_message": get_deepseek_advice(query, f"Tentang {final_crop}")})
+        if not final_crop: 
+            ai_msg = get_deepseek_advice(query, "No Crop Detected", True)
+            if session_id: db.add_message(session_id, "ai", ai_msg)
+            return jsonify({"result_text": "Butuh Info", "ai_message": ai_msg})
+        
+        ai_msg = get_deepseek_advice(query, f"Tentang {final_crop}")
+        if session_id: db.add_message(session_id, "ai", ai_msg)
+        return jsonify({"result_text": "Info Umum", "ai_message": ai_msg})
 
     # Missing Info Check
     if not final_crop or not final_prov:
         missing = []
         if not final_crop: missing.append("Tanaman")
         if not final_prov: missing.append("Lokasi")
-        return jsonify({"result_text": "Butuh Info", "ai_message": get_deepseek_advice(query, f"Missing: {missing}. Have: Crop={final_crop}, Loc={final_prov}", True)})
+        
+        ai_msg = get_deepseek_advice(query, f"Missing: {missing}. Have: Crop={final_crop}, Loc={final_prov}", True)
+        if session_id: db.add_message(session_id, "ai", ai_msg)
+        return jsonify({"result_text": "Butuh Info", "ai_message": ai_msg})
 
     # --- MAIN LOGIC ---
     is_optimization = any(w in query for w in ['kapan', 'terbaik', 'optimal'])
@@ -330,10 +375,17 @@ def predict():
         )
 
     ai_response = get_deepseek_advice(query, result_text)
+    
+    if session_id: db.add_message(session_id, "ai", ai_response)
+    
     return jsonify({"result_text": result_text, "ai_message": ai_response})
 
 if __name__ == '__main__':
     print("-------------------------------------------------------")
+    print(" SYSTEM STARTUP ")
+    print(" initializing database... ")
+    db.init_db()
+    print(" database initialized! ")
     print(" SYSTEM READY: Debug Logs Restored ")
     print(" Listening on http://0.0.0.0:5000")
     print("-------------------------------------------------------")

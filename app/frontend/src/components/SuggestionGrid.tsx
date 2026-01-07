@@ -5,23 +5,23 @@ export function SuggestionGrid({ onSelect }: SuggestionGridProps) {
   const suggestions: Suggestion[] = [
     {
       icon: <Sprout className="h-6 w-6 text-green-400" />,
-      text: "Kapan hari yang bagus untuk menanam jagung?",
-      label: "Panduan Penanaman"
+      text: "Kapan waktu terbaik untuk menanam jeruk nipis di Bandung?",
+      label: "Rekomendasi Tanam"
     },
     {
       icon: <CloudRain className="h-6 w-6 text-blue-400" />,
-      text: "Bagaimana prediksi curah hujan bulan ini?",
-      label: "Prediksi Curah Hujan"
+      text: "Prediksi hasil panen Padi di Surabaya tanggal 20 Januari",
+      label: "Prediksi Panen"
     },
     {
       icon: <Calendar className="h-6 w-6 text-orange-400" />,
-      text: "Buatkan jadwal pemupukan untuk padi.",
-      label: "Jadwal Pemupukan"
+      text: "Apakah cocok menanam Cabai di Jakarta bulan ini?",
+      label: "Kecocokan Lahan"
     },
     {
       icon: <TrendingUp className="h-6 w-6 text-purple-400" />,
-      text: "Analisa tren harga cabai saat ini.",
-      label: "Analisis Harga"
+      text: "Berapa estimasi hasil panen Jagung di Medan?",
+      label: "Estimasi Yield"
     }
   ];
 

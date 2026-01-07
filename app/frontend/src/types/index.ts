@@ -9,7 +9,10 @@ export interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onNewChat: () => void;
+  sessions?: { id: string; title: string }[];
+  onSelectSession?: (id: string) => void;
 }
+
 
 export interface MessageBubbleProps {
   message?: string;

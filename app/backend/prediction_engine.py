@@ -135,21 +135,68 @@ class CropPredictor:
 
     def find_best_planting_time(self, crop, province):
         """
-        BRUTE FORCE OPTIMIZATION (365 DAYS)
-        Now with interpolation, so Jan 5 will yield differently than Jan 6.
+        VECTORIZED OPTIMIZATION (365 DAYS)
         """
-        start_date = pd.Timestamp.now()
-        best_date = None
-        best_yield = -1.0
+        start_date = pd.Timestamp.now().normalize()
+        prov_norm = self.normalize_province(province)
         
-        # Loop 365 days
-        for day_offset in range(365):
-            check_date = start_date + datetime.timedelta(days=day_offset)
+        # 1. Generate 365 Dates
+        dates = [start_date + pd.Timedelta(days=i) for i in range(365)]
+        months = np.array([d.month for d in dates])
+        days = np.array([d.day for d in dates])
+        
+        # 2. Pre-fetch Weather & Soil (Batch)
+        soil_stats = self.soil_lookup.get(prov_norm, {'Soil_pH': 6.0, 'Clay_Ratio': 30.0, 'Sand_Ratio': 30.0})
+        
+        # Optimize Weather Interpolation for 365 days
+        weather_daily = []
+        for d in dates:
+            weather_daily.append(self.get_interpolated_weather(province, d))
             
-            yield_val = self.predict_yield_internal(crop, province, check_date)
+        weather_df = pd.DataFrame(weather_daily)
+        
+        # 3. Construct Batch DataFrame
+        duration = self.duration_lookup.get(crop, 90.0)
+        
+        # Create base dataframe with all features
+        data_batch = {
+            'Avg_Temp': weather_df['Avg_Temp'].values,
+            'Total_Rainfall': weather_df['Total_Rainfall'].values,
+            'Avg_Humidity': weather_df['Avg_Humidity'].values,
+            'Avg_Soil_Moisture': weather_df['Avg_Soil_Moisture'].values,
+            'Soil_pH': [soil_stats['Soil_pH']] * 365,
+            'Clay_Ratio': [soil_stats['Clay_Ratio']] * 365,
+            'Sand_Ratio': [soil_stats['Sand_Ratio']] * 365,
+            'Planting_Month': months,
+            'Duration_Days': [duration] * 365,
+            'Rain_Intensity': (weather_df['Total_Rainfall'] / duration).values,
+            'Heat_Sum': (weather_df['Avg_Temp'] * duration).values
+        }
+        
+        # Initialize full feature matrix with 0.0
+        batch_df = pd.DataFrame(0.0, index=range(365), columns=self.model_columns)
+        
+        # Fill in the dense features
+        for col, values in data_batch.items():
+            if col in batch_df.columns:
+                batch_df[col] = values
+                
+        # One-Hot Encoding
+        crop_col = f"Crop_{crop}"
+        prov_col = f"Province_{prov_norm}"
+        
+        if crop_col in batch_df.columns:
+            batch_df[crop_col] = 1.0
+        if prov_col in batch_df.columns:
+            batch_df[prov_col] = 1.0
             
-            if yield_val > best_yield:
-                best_yield = yield_val
-                best_date = check_date
+        # 4. Batch Predict
+        log_preds = self.model.predict(batch_df)
+        yields = np.expm1(log_preds)
+        
+        # 5. Find Max
+        best_idx = np.argmax(yields)
+        best_yield = float(max(0, yields[best_idx]))
+        best_date_str = dates[best_idx].strftime('%Y-%m-%d')
 
-        return best_date.strftime('%Y-%m-%d'), best_yield
+        return best_date_str, best_yield

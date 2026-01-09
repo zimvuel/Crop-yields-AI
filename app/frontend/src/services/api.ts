@@ -9,7 +9,7 @@ export interface Message {
   content: string;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export const fetchSessions = async (): Promise<Session[]> => {
   const res = await fetch(`${API_BASE}/sessions`);
@@ -30,7 +30,6 @@ export const createSession = async (title: string = 'New Chat'): Promise<Session
 export const fetchMessages = async (sessionId: string): Promise<Message[]> => {
   const res = await fetch(`${API_BASE}/sessions/${sessionId}/messages`);
   if (!res.ok) throw new Error('Failed to load messages');
-  return res.json();
   return res.json();
 };
 

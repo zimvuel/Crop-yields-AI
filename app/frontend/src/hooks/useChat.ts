@@ -66,10 +66,6 @@ export function useChat() {
       if (sessionId === id) {
         setSessionId(undefined);
         setMessages([]);
-        if (updatedSessions.length > 0) {
-            // Optional: Automatically switch to the first available session
-            // loadSession(updatedSessions[0].id); 
-        }
       }
     } catch (e) {
       console.error("Failed to delete session", e);

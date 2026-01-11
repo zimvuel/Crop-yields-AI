@@ -1,47 +1,29 @@
 # AgroTime AI 🌾
 
-AgroTime AI adalah sistem konsultan pertanian cerdas berbasis web yang mengintegrasikan prediksi hasil panen (menggunakan XGBoost) dengan antarmuka chat interaktif (menggunakan React & LLM).
-
-Panduan ini akan membantu Anda menjalankan aplikasi secara lokal di komputer Anda.
+AgroTime AI adalah sistem konsultan pertanian cerdas berbasis web yang mengintegrasikan prediksi hasil panen dengan antarmuka chatbot.
+Panduan ini akan membantu menjalankan aplikasi secara lokal.
 
 ## 📋 Prasyarat Sistem
 
-Sebelum memulai, pastikan komputer Anda telah terinstal:
-
 * **Python** (Versi 3.8 hingga 3.11 disarankan)
 * **Node.js** (Versi 18+ disarankan untuk React 19)
-* **npm** (Biasanya sudah terinstal otomatis bersama Node.js)
+* **npm** (atau Node.js)
 
 ---
 
-## 🚀 Langkah 1: Menjalankan Backend (Server)
-
-Backend bertugas menangani logika prediksi AI, koneksi database, dan komunikasi dengan API DeepSeek.
+## 🚀 Langkah 1: Menjalankan Backend
 
 1.  Buka terminal/command prompt.
 2.  Masuk ke folder `backend`:
     ```bash
     cd backend
     ```
-
-3.  (Opsional namun Disarankan) Buat dan aktifkan *Virtual Environment* agar library tidak tercampur:
-    * **Windows:**
-        ```bash
-        python -m venv venv
-        venv\Scripts\activate
-        ```
-    * **Mac/Linux:**
-        ```bash
-        python3 -m venv venv
-        source venv/bin/activate
-        ```
-
-4.  Instal dependensi yang diperlukan (sesuai `requirements.txt`):
+3.  Instal dependensi yang diperlukan (sesuai `requirements.txt`):
     ```bash
     pip install -r requirements.txt
     ```
 
-5.  Jalankan server:
+4.  Jalankan server:
     ```bash
     python app.py
     ```
@@ -50,9 +32,7 @@ Backend bertugas menangani logika prediksi AI, koneksi database, dan komunikasi 
 
 ---
 
-## 💻 Langkah 2: Menjalankan Frontend (User Interface)
-
-Frontend adalah tampilan website tempat pengguna berinteraksi dengan chatbot.
+## 💻 Langkah 2: Menjalankan Frontend
 
 1.  Buka terminal **baru** (jangan tutup terminal backend).
 2.  Masuk ke folder `frontend`:
@@ -70,8 +50,8 @@ Frontend adalah tampilan website tempat pengguna berinteraksi dengan chatbot.
     npm run dev
     ```
 
-5.  Terminal akan menampilkan alamat lokal, biasanya:
+5.  Terminal akan menampilkan alamat lokal:
     ```
     http://localhost:5173
     ```
-    Buka alamat tersebut di browser Anda (Chrome/Edge/Firefox).
+    Buka alamat tersebut di browser (Chrome/Edge/Firefox).

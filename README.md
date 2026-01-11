@@ -1,9 +1,9 @@
-# AgroTime AI 🌾
+# AgroTime AI
 
 AgroTime AI adalah sistem konsultan pertanian cerdas berbasis web yang mengintegrasikan prediksi hasil panen dengan antarmuka chatbot.
 Panduan ini akan membantu menjalankan aplikasi secara lokal.
 
-## 📋 Prasyarat Sistem
+## Prasyarat Sistem
 
 * **Python** (Versi 3.8 hingga 3.11 disarankan)
 * **Node.js** (Versi 18+ disarankan untuk React 19)
@@ -11,12 +11,12 @@ Panduan ini akan membantu menjalankan aplikasi secara lokal.
 
 ---
 
-## 🚀 Langkah 1: Menjalankan Backend
+## Langkah 1: Menjalankan Backend
 
 1.  Buka terminal/command prompt.
 2.  Masuk ke folder `backend`:
     ```bash
-    cd backend
+    cd app/backend
     ```
 3.  Instal dependensi yang diperlukan (sesuai `requirements.txt`):
     ```bash
@@ -32,12 +32,12 @@ Panduan ini akan membantu menjalankan aplikasi secara lokal.
 
 ---
 
-## 💻 Langkah 2: Menjalankan Frontend
+## Langkah 2: Menjalankan Frontend
 
 1.  Buka terminal **baru** (jangan tutup terminal backend).
 2.  Masuk ke folder `frontend`:
     ```bash
-    cd frontend
+    cd app/frontend
     ```
 
 3.  Instal dependensi React dan Tailwind (sesuai `package.json`):
